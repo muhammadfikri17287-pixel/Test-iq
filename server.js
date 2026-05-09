@@ -1,61 +1,59 @@
 const express = require('express');
-const crypto = require('crypto');
 const path = require('path');
-
+const crypto = require('crypto');
 const app = express();
+
 app.use(express.json());
-app.use(express.static('public')); // Melayani file web
 
-// Database Sementara (Ganti ke MongoDB nanti kalau mau serius)
-let dbScores = []; 
-const ADMIN_PASS = "Lain2026"; // Password untuk masuk panel Admin
+// 1. SETTING FOLDER STATIS (Agar gambar/css/js di folder public terbaca)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Fungsi pembuat kode acak harian berdasarkan tanggal
+// 2. PASSWORD ADMIN (Ganti sesuka lo)
+const ADMIN_PASS = "Lain2026";
+
+// 3. LOGIKA DAILY TOKEN (Otomatis ganti tiap jam 00:00)
 function generateDailyCode() {
-    const today = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
-    const hash = crypto.createHash('sha256').update(today + "secretSalt").digest('hex');
+    const today = new Date().toISOString().slice(0, 10); 
+    const hash = crypto.createHash('sha256').update(today + "secret-salt-iq").digest('hex');
     return "ARCH-" + hash.slice(0, 5).toUpperCase();
 }
 
-// API: Verifikasi Login Siswa
-app.post('/api/student-login', (req, res) => {
-    const { name, code } = req.body;
-    const dailyCode = generateDailyCode();
-    
-    if (code === dailyCode) {
-        res.json({ success: true, message: "Akses Diberikan." });
-    } else {
-        res.json({ success: false, message: "Akses Ditolak. Kode salah atau kedaluwarsa." });
-    }
+// Munculkan token di LOGS Vercel saat server nyala
+const dailyCode = generateDailyCode();
+console.log(`====================================`);
+console.log(`[SYSTEM] Server Aktif`);
+console.log(`[KEY] Kode Siswa Hari Ini: ${dailyCode}`);
+console.log(`====================================`);
+
+// 4. ROUTE HALAMAN UTAMA (Arahkan ke index.html)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API: Simpan Skor Siswa
-app.post('/api/submit-score', (req, res) => {
-    const { name, score, totalQuestions } = req.body;
-    dbScores.push({
-        name: name,
-        score: score,
-        accuracy: Math.round((score / totalQuestions) * 100) + "%",
-        time: new Date().toLocaleTimeString()
-    });
-    res.json({ success: true });
-});
-
-// API: Login Admin & Ambil Data
+// 5. API UNTUK LOGIN ADMIN
 app.post('/api/admin', (req, res) => {
     const { password } = req.body;
     if (password === ADMIN_PASS) {
-        res.json({ success: true, data: dbScores, dailyCode: generateDailyCode() });
+        res.json({ success: true, dailyCode: dailyCode });
     } else {
-        res.json({ success: false, message: "Password Admin Salah!" });
+        res.status(401).json({ success: false, message: "Password Admin Salah!" });
     }
 });
 
-// TULISAN BARU (Pakai yang ini sekarang)
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`[SYSTEM] Server aktif di port: ${PORT}`);
-    console.log(`[KEY] Kode Siswa Hari Ini: ${generateDailyCode()}`);
+// 6. API UNTUK VALIDASI KODE SISWA
+app.post('/api/validate', (req, res) => {
+    const { code } = req.body;
+    if (code === dailyCode) {
+        res.json({ success: true, message: "Akses Diberikan!" });
+    } else {
+        res.status(403).json({ success: false, message: "Kode Akses Salah atau Kadaluwarsa!" });
+    }
 });
 
+// 7. PORT (Otomatis menyesuaikan server Vercel)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+module.exports = app; // Penting untuk Vercel
