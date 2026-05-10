@@ -3,32 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT-AM | Login Tes IQ</title>
+    <title>CBT-AM | Portal Ujian</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 350px; text-align: center; border-top: 5px solid #e94560; }
-        h2 { margin-bottom: 20px; color: #e94560; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #0f3460; color: white; text-align: center; font-size: 16px; }
-        button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: none; background: #e94560; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #ff4d6d; transform: scale(1.02); }
-        .admin-link { margin-top: 20px; font-size: 12px; color: #533483; cursor: pointer; text-decoration: underline; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1a2e;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background: #16213e;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            border-top: 6px solid #e94560;
+        }
+        .logo-area h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #e94560;
+            letter-spacing: 2px;
+        }
+        .logo-area p {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 25px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #0f3460;
+            background: #0f3460;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: #e94560;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff4d6d;
+            transform: scale(1.02);
+        }
+        .admin-link {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #533483;
+            cursor: pointer;
+        }
+        /* Custom SweetAlert Style */
+        .swal2-popup { background: #16213e !important; color: white !important; border-radius: 15px !important; }
+        .swal2-title, .swal2-html-container { color: white !important; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <h2>CBT-AM</h2>
-    <p>Masukkan Kode Akses Siswa</p>
-    <input type="text" id="studentCode" placeholder="Contoh: ARCH-XXXXX" autocomplete="off">
+    <div class="logo-area">
+        <h1>CBT-AM</h1>
+        <p>Al-Muslim Computer Based Test</p>
+    </div>
+
+    <input type="text" id="studentCode" placeholder="KODE AKSES" maxlength="10">
     <button onclick="loginSiswa()">MASUK UJIAN</button>
-    <div class="admin-link" onclick="loginAdmin()">Panel Admin</div>
+
+    <div class="admin-link" onclick="loginAdmin()">Panel Administrator</div>
 </div>
 
 <script>
-// 1. FUNGSI LOGIN SISWA
+// FUNGSI LOGIN SISWA
 async function loginSiswa() {
-    const code = document.getElementById('studentCode').value.toUpperCase();
-    if (!code) return alert("Isi kodenya dulu, Bos!");
+    const code = document.getElementById('studentCode').value.toUpperCase().trim();
+
+    if (!code) {
+        return Swal.fire({ icon: 'warning', title: 'Kosong?', text: 'Masukkan kode akses dulu!', confirmButtonColor: '#e94560' });
+    }
+
+    Swal.fire({ title: 'Mengecek...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
     try {
         const response = await fetch('/api/validate', {
@@ -40,43 +114,52 @@ async function loginSiswa() {
         const data = await response.json();
         
         if (data.success) {
-            alert("✅ Akses Diterima! Selamat mengerjakan.");
-            window.location.href = "soal.html"; 
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Akses diterima.', showConfirmButton: false, timer: 1500 })
+            .then(() => { window.location.href = "soal.html"; });
         } else {
-            alert("❌ Gagal: " + data.message);
+            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, confirmButtonColor: '#e94560' });
         }
     } catch (err) {
-        alert("Server Vercel sedang sibuk!");
+        Swal.fire({ icon: 'error', title: 'Offline', text: 'Server tidak merespon!', confirmButtonColor: '#e94560' });
     }
 }
 
-// 2. FUNGSI LOGIN ADMIN (Untuk cek token harian)
+// FUNGSI LOGIN ADMIN
 async function loginAdmin() {
-    const password = prompt("Masukkan Password Admin:");
-    if (!password) return;
+    const { value: password } = await Swal.fire({
+        title: 'Login Admin',
+        input: 'password',
+        inputLabel: 'Password',
+        showCancelButton: true,
+        confirmButtonColor: '#e94560'
+    });
 
-    try {
-        const response = await fetch('/api/admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert("🔓 LOGIN ADMIN BERHASIL!\n\nKode Siswa Hari Ini: " + data.dailyCode);
-            // Salin otomatis ke clipboard
-            navigator.clipboard.writeText(data.dailyCode);
-            alert("Kode " + data.dailyCode + " sudah disalin ke clipboard!");
-        } else {
-            alert("❌ Password Salah!");
+    if (password) {
+        try {
+            const response = await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Token Hari Ini',
+                    html: `<h2 style="color:#e94560">${data.dailyCode}</h2>`,
+                    confirmButtonText: 'Salin Kode',
+                    confirmButtonColor: '#e94560'
+                }).then(() => {
+                    navigator.clipboard.writeText(data.dailyCode);
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Salah!', text: 'Password Admin salah.' });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal terhubung.' });
         }
-    } catch (err) {
-        alert("Koneksi gagal!");
     }
 }
 </script>
-
 </body>
 </html>
