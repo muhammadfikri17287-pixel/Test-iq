@@ -3,303 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURON | Cognitive Test</title>
+    <title>CBT-AM | Login Tes IQ</title>
     <style>
-        /* CSS: DARK THEME & CLEAN UI */
-        :root {
-            --bg-color: #0d1117;
-            --card-color: #161b22;
-            --text-color: #c9d1d9;
-            --accent-color: #58a6ff;
-            --danger-color: #f85149;
-            --success-color: #3fb950;
-            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .container {
-            background-color: var(--card-color);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            border: 1px solid #30363d;
-        }
-
-        h1 { color: var(--accent-color); margin-bottom: 30px; letter-spacing: 2px; }
-        
-        .view { display: none; }
-        .view.active { display: block; }
-
-        input {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            background-color: #010409;
-            border: 1px solid #30363d;
-            color: var(--text-color);
-            border-radius: 6px;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        input:focus { border-color: var(--accent-color); outline: none; }
-
-        button {
-            width: 95%;
-            padding: 12px;
-            margin-top: 15px;
-            background-color: var(--accent-color);
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        button:hover { background-color: #1f6feb; }
-        button.secondary { background-color: transparent; border: 1px solid var(--accent-color); margin-top: 10px;}
-        button.secondary:hover { background-color: rgba(88, 166, 255, 0.1); }
-
-        /* Area Tes IQ */
-        #timer { font-size: 24px; font-weight: bold; color: var(--danger-color); }
-        .logic-box {
-            background-color: #010409;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 28px;
-            letter-spacing: 5px;
-            margin: 20px 0;
-            border: 1px solid #30363d;
-            font-family: monospace;
-        }
-
-        /* Tabel Admin */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-        th, td { padding: 10px; border-bottom: 1px solid #30363d; text-align: center; }
-        th { color: var(--accent-color); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 350px; text-align: center; border-top: 5px solid #e94560; }
+        h2 { margin-bottom: 20px; color: #e94560; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #0f3460; color: white; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: none; background: #e94560; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #ff4d6d; transform: scale(1.02); }
+        .admin-link { margin-top: 20px; font-size: 12px; color: #533483; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div id="view-home" class="view active">
-            <h1>NEURON ENGINE</h1>
-            <p>Pilih jalur akses sistem.</p>
-            <button onclick="switchView('view-student-login')">Akses Siswa (Test)</button>
-            <button class="secondary" onclick="switchView('view-admin-login')">Akses Admin</button>
-        </div>
+<div class="login-card">
+    <h2>CBT-AM</h2>
+    <p>Masukkan Kode Akses Siswa</p>
+    <input type="text" id="studentCode" placeholder="Contoh: ARCH-XXXXX" autocomplete="off">
+    <button onclick="loginSiswa()">MASUK UJIAN</button>
+    <div class="admin-link" onclick="loginAdmin()">Panel Admin</div>
+</div>
 
-        <div id="view-student-login" class="view">
-            <h1>Akses Subjek</h1>
-            <input type="text" id="studentName" placeholder="Nama Lengkap" autocomplete="off">
-            <input type="text" id="dailyCode" placeholder="Kode Akses Harian" autocomplete="off" style="text-transform: uppercase;">
-            <button onclick="loginStudent()">Mulai Ujian</button>
-            <button class="secondary" onclick="switchView('view-home')">Kembali</button>
-            <p id="studentMsg" style="color: var(--danger-color); font-size: 14px;"></p>
-        </div>
+<script>
+// 1. FUNGSI LOGIN SISWA
+async function loginSiswa() {
+    const code = document.getElementById('studentCode').value.toUpperCase();
+    if (!code) return alert("Isi kodenya dulu, Bos!");
 
-        <div id="view-admin-login" class="view">
-            <h1>Otoritas Admin</h1>
-            <input type="password" id="adminPass" placeholder="Masukkan Password">
-            <button onclick="loginAdmin()">Buka Dashboard</button>
-            <button class="secondary" onclick="switchView('view-home')">Kembali</button>
-            <p id="adminMsg" style="color: var(--danger-color); font-size: 14px;"></p>
-        </div>
-
-        <div id="view-test" class="view">
-            <h1>UJI LOGIKA</h1>
-            <div id="timer">02:00</div>
-            <div class="logic-box" id="questionDisplay">?</div>
-            <input type="number" id="answerInput" placeholder="Ketik jawaban angka..." autocomplete="off">
-            <button onclick="submitAnswer()">Jawab (Enter)</button>
-        </div>
-
-        <div id="view-admin-dashboard" class="view">
-            <h1>DASHBOARD</h1>
-            <p style="font-size: 14px;">Kode Harian: <strong id="adminDailyCode" style="color:var(--success-color)"></strong></p>
-            <div style="max-height: 250px; overflow-y: auto;">
-                <table id="scoreTable">
-                    <tr><th>Nama</th><th>Skor</th><th>Akurasi</th></tr>
-                    </table>
-            </div>
-            <button class="secondary" onclick="switchView('view-home')">Logout</button>
-        </div>
-
-        <div id="view-result" class="view">
-            <h1>UJI SELESAI</h1>
-            <p>Skor Akhir Logika Anda:</p>
-            <h1 id="finalScore" style="color: var(--success-color); font-size: 48px;">0</h1>
-            <button onclick="switchView('view-home')">Selesai</button>
-        </div>
-
-    </div>
-
-    <script>
-        // State Management
-        let currentStudent = "";
-        let currentAnswer = 0;
-        let score = 0;
-        let totalQ = 0;
-        let timeRemaining = 120; // 2 Menit (Time Attack)
-        let timerInterval;
-
-        // Navigasi UI
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
-
-        // ==================== LOGIKA SISWA & TES ====================
-
-        async function loginStudent() {
-            const name = document.getElementById('studentName').value;
-            const code = document.getElementById('dailyCode').value.toUpperCase();
-            const msgBox = document.getElementById('studentMsg');
-
-            if(!name || !code) return msgBox.innerText = "Isi semua data!";
-
-            const res = await fetch('/api/student-login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, code })
-            });
-            const data = await res.json();
-
-            if(data.success) {
-                currentStudent = name;
-                startTest();
-            } else {
-                msgBox.innerText = data.message;
-            }
-        }
-
-        function startTest() {
-            score = 0; totalQ = 0; timeRemaining = 120;
-            switchView('view-test');
-            generateProceduralQuestion();
-            
-            // Timer Engine
-            document.getElementById('timer').innerText = "02:00";
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
-                let s = (timeRemaining % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `${m}:${s}`;
-
-                if(timeRemaining <= 0) finishTest();
-            }, 1000);
-        }
-
-        // PROCEDURAL GENERATION ALGORITHM (Soal Tak Terbatas)
-        function generateProceduralQuestion() {
-            // Algoritma membuat pola deret angka secara dinamis
-            const type = Math.floor(Math.random() * 3); // 3 Jenis pola logika
-            let seq = [];
-
-            if (type === 0) {
-                // Pola penambahan progresif (misal: +2, +3, +4)
-                let start = Math.floor(Math.random() * 10) + 1;
-                let step = Math.floor(Math.random() * 3) + 1;
-                seq.push(start);
-                for(let i=1; i<4; i++) {
-                    start += (step + i);
-                    seq.push(start);
-                }
-                currentAnswer = start + (step + 4);
-            } else if (type === 1) {
-                // Pola perkalian (misal: x2, x2)
-                let start = Math.floor(Math.random() * 5) + 2;
-                let mult = Math.floor(Math.random() * 2) + 2;
-                seq = [start, start*mult, start*(mult*mult), start*(mult*mult*mult)];
-                currentAnswer = start * Math.pow(mult, 4);
-            } else {
-                // Pola selang-seling (+ / -)
-                let start = Math.floor(Math.random() * 50) + 20;
-                let add = Math.floor(Math.random() * 10) + 5;
-                let sub = Math.floor(Math.random() * 5) + 1;
-                seq = [start, start+add, (start+add)-sub, ((start+add)-sub)+add];
-                currentAnswer = (((start+add)-sub)+add)-sub;
-            }
-
-            document.getElementById('questionDisplay').innerText = `${seq[0]}  ${seq[1]}  ${seq[2]}  ${seq[3]}  ?`;
-            document.getElementById('answerInput').value = '';
-            document.getElementById('answerInput').focus();
-        }
-
-        function submitAnswer() {
-            const userAnswer = parseInt(document.getElementById('answerInput').value);
-            if(isNaN(userAnswer)) return;
-
-            totalQ++;
-            if (userAnswer === currentAnswer) {
-                score += 15; // Bobot skor
-            }
-            generateProceduralQuestion();
-        }
-
-        // Dukungan Enter Keyboard
-        document.getElementById("answerInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") submitAnswer();
+    try {
+        const response = await fetch('/api/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
         });
-
-        async function finishTest() {
-            clearInterval(timerInterval);
-            // Kirim ke server
-            await fetch('/api/submit-score', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: currentStudent, score: score, totalQuestions: totalQ })
-            });
-
-            document.getElementById('finalScore').innerText = score;
-            switchView('view-result');
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert("✅ Akses Diterima! Selamat mengerjakan.");
+            window.location.href = "soal.html"; 
+        } else {
+            alert("❌ Gagal: " + data.message);
         }
+    } catch (err) {
+        alert("Server Vercel sedang sibuk!");
+    }
+}
 
-        // ==================== LOGIKA ADMIN ====================
+// 2. FUNGSI LOGIN ADMIN (Untuk cek token harian)
+async function loginAdmin() {
+    const password = prompt("Masukkan Password Admin:");
+    if (!password) return;
 
-        async function loginAdmin() {
-            const password = document.getElementById('adminPass').value;
-            const msgBox = document.getElementById('adminMsg');
-
-            const res = await fetch('/api/admin', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            });
-            const result = await res.json();
-
-            if(result.success) {
-                document.getElementById('adminDailyCode').innerText = result.dailyCode;
-                const table = document.getElementById('scoreTable');
-                // Reset tabel kecuali header
-                table.innerHTML = `<tr><th>Nama Siswa</th><th>Skor</th><th>Akurasi</th></tr>`;
-                
-                // Isi tabel dari database server
-                result.data.forEach(row => {
-                    table.innerHTML += `<tr><td>${row.name}</td><td>${row.score}</td><td>${row.accuracy}</td></tr>`;
-                });
-                
-                document.getElementById('adminPass').value = '';
-                switchView('view-admin-dashboard');
-            } else {
-                msgBox.innerText = result.message;
-            }
+    try {
+        const response = await fetch('/api/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert("🔓 LOGIN ADMIN BERHASIL!\n\nKode Siswa Hari Ini: " + data.dailyCode);
+            // Salin otomatis ke clipboard
+            navigator.clipboard.writeText(data.dailyCode);
+            alert("Kode " + data.dailyCode + " sudah disalin ke clipboard!");
+        } else {
+            alert("❌ Password Salah!");
         }
-    </script>
+    } catch (err) {
+        alert("Koneksi gagal!");
+    }
+}
+</script>
+
 </body>
 </html>
-
