@@ -3,57 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tes IQ - Ujian Sekolah</title>
+    <title>Analisis IQ</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: auto; }
-        .header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
-        .soal-text { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-        .opsi { display: block; background: #e9ecef; margin: 10px 0; padding: 12px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .opsi:hover { background: #dee2e6; }
-        input[type="radio"] { margin-right: 10px; }
-        .btn-next { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; }
-        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #888; }
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; display: flex; justify-content: center; }
+        .box { width: 100%; max-width: 500px; background: #1e293b; padding: 25px; border-radius: 15px; }
+        .opsi { display: block; background: #334155; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="header">
-        <h2>Soal Tes IQ 🧠</h2>
-        <p id="timer">Sisa Waktu: 30:00</p>
+    <div class="box">
+        <h2 id="qNum">Soal 1</h2>
+        <p id="qText" style="font-size: 18px;"></p>
+        <div id="options"></div>
+        <button onclick="next()" style="width: 100%; padding: 12px; margin-top: 15px; background: #00d2ff; border: none; border-radius: 8px; font-weight: bold;">LANJUT</button>
     </div>
 
-    <div id="quiz-container">
-        <div class="soal-text">1. Jika "MATA" adalah "2121", maka "KATA" adalah...</div>
-        <label class="opsi"><input type="radio" name="soal1" value="A"> 1121</label>
-        <label class="opsi"><input type="radio" name="soal1" value="B"> 3121</label>
-        <label class="opsi"><input type="radio" name="soal1" value="C"> 2121</label>
-        <label class="opsi"><input type="radio" name="soal1" value="D"> 4121</label>
-        
-        <button class="btn-next" onclick="submitTest()">Selesai & Kirim</button>
-    </div>
+    <script>
+        const soal = [
+            { q: "Pola: 2, 4, 8, 16, ...", o: ["24", "32", "30", "64"], a: 1 },
+            { q: "Mana yang tidak cocok?", o: ["Meja", "Kursi", "Lemari", "Air"], a: 3 },
+            { q: "Jika A=1, B=2, maka CAB=?", o: ["312", "123", "213", "321"], a: 0 }
+        ];
+        let current = 0, skor = 0;
 
-    <div class="footer">
-        &copy; 2026 CBT-AM Simulator - Architect System
-    </div>
-</div>
+        function tampil() {
+            document.getElementById('qNum').innerText = `Analisis ${current + 1}/${soal.length}`;
+            document.getElementById('qText').innerText = soal[current].q;
+            document.getElementById('options').innerHTML = soal[current].o.map((x, i) => 
+                `<label class="opsi"><input type="radio" name="z" value="${i}"> ${x}</label>`).join('');
+        }
 
-<script>
-    function submitTest() {
-        alert("Jawaban Anda telah terkirim ke server! Terima kasih sudah mengikuti tes.");
-        window.location.href = "/"; // Balik ke halaman login
-    }
+        async function next() {
+            const r = document.querySelector('input[name="z"]:checked');
+            if(!r) return Swal.fire('Oops', 'Pilih jawaban dulu!', 'warning');
+            if(parseInt(r.value) === soal[current].a) skor += 40; // Contoh kalkulasi skor
 
-    // Timer simpel 30 menit
-    let time = 1800;
-    setInterval(() => {
-        let min = Math.floor(time / 60);
-        let sec = time % 60;
-        document.getElementById('timer').innerText = `Sisa Waktu: ${min}:${sec < 10 ? '0'+sec : sec}`;
-        if(time > 0) time--;
-    }, 1000);
-</script>
-
+            if(current < soal.length - 1) {
+                current++; tampil();
+            } else {
+                const nama = localStorage.getItem('namaPeserta');
+                await fetch('/api/submit', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ nama, skor }) 
+                });
+                Swal.fire('Selesai', `Skor IQ Anda: ${skor}`, 'success').then(() => window.location.href = "/");
+            }
+        }
+        tampil();
+    </script>
 </body>
 </html>
