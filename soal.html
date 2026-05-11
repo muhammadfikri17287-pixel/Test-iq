@@ -1,108 +1,100 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensa Style | IQ Analysis</title>
+    <title>Analisis Mensa | IQ Test</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; }
-        .timer-bar { font-size: 24px; font-weight: bold; color: #00d2ff; text-align: center; margin-bottom: 20px; }
-        .question { font-size: 20px; margin-bottom: 20px; }
-        .option { display: block; background: #334155; padding: 15px; margin: 10px 0; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .option:hover { background: #475569; }
-        .stats { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; margin-top: 20px; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .box { width: 100%; max-width: 500px; background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; position: relative; }
+        #timer { font-size: 32px; font-weight: 800; color: #00d2ff; text-align: center; margin-bottom: 20px; font-variant-numeric: tabular-nums; }
+        .q-text { font-size: 18px; line-height: 1.6; margin-bottom: 25px; min-height: 70px; }
+        .opt { display: block; background: #0f172a; padding: 15px; margin: 10px 0; border-radius: 12px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .opt:hover { border-color: #00d2ff; background: #1a2a44; }
+        .footer { display: flex; justify-content: space-between; margin-top: 25px; font-size: 13px; color: #64748b; border-top: 1px solid #334155; padding-top: 15px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="timer-bar" id="timer">60:00</div>
-        <div class="question" id="qText">Menyiapkan analisis...</div>
+    <div class="box">
+        <div id="timer">60:00</div>
+        <div class="q-text" id="question">Menyiapkan...</div>
         <div id="options"></div>
-        <div class="stats">
-            <span>Terjawab: <b id="statTotal">0</b></span>
-            <span>Benar: <b id="statCorrect">0</b></span>
+        <div class="footer">
+            <span>Dikerjakan: <b id="total" style="color:white">0</b></span>
+            <span>Akurasi Benar: <b id="correct" style="color:white">0</b></span>
         </div>
     </div>
 
     <script>
-        let timeLeft = 3600; // 60 Menit
-        let correctCount = 0;
-        let totalCount = 0;
-        let currentAnswer = 0;
+    let timeLeft = 3600; 
+    let cCount = 0, tCount = 0, curAns = "";
 
-        // Generator Soal Logika/Matematika Random
-        function generateQuestion() {
-            const types = ['pola', 'hitung', 'logika'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            let q = "", opts = [], ans = 0;
+    function generate() {
+        const type = Math.floor(Math.random() * 3);
+        let q = "", ops = [], ans = "";
 
-            if(type === 'hitung') {
-                const a = Math.floor(Math.random() * 50), b = Math.floor(Math.random() * 50);
-                q = `Berapakah hasil dari ${a} + ${b}?`;
-                ans = a + b;
-                opts = [ans, ans+2, ans-1, ans+5].sort(() => Math.random() - 0.5);
-            } else if(type === 'pola') {
-                const start = Math.floor(Math.random() * 10), step = Math.floor(Math.random() * 5) + 1;
-                q = `Lanjutkan pola: ${start}, ${start+step}, ${start+(step*2)}, ...`;
-                ans = start + (step * 3);
-                opts = [ans, ans+step, ans-step, start+(step*4)].sort(() => Math.random() - 0.5);
-            } else {
-                q = "Jika semua A adalah B, dan semua B adalah C, maka...";
-                const options = ["Semua A adalah C", "Semua C adalah A", "Beberapa A bukan C", "Tidak ada kesimpulan"];
-                ans = options[0];
-                opts = options.sort(() => Math.random() - 0.5);
-            }
-
-            document.getElementById('qText').innerText = q;
-            currentAnswer = ans;
-            document.getElementById('options').innerHTML = opts.map(o => 
-                `<div class="option" onclick="check('${o}')">${o}</div>`).join('');
+        if(type === 0) { // Math
+            let a = Math.floor(Math.random()*50)+1, b = Math.floor(Math.random()*50)+1;
+            q = `Berapakah hasil dari ${a} + ${b}?`;
+            ans = (a + b).toString();
+            ops = [ans, (a+b+1).toString(), (a+b-2).toString(), (a+b+5).toString()];
+        } else if(type === 1) { // Sequence
+            let s = Math.floor(Math.random()*10), step = Math.floor(Math.random()*5)+2;
+            q = `Tentukan angka selanjutnya: ${s}, ${s+step}, ${s+step*2}, ...`;
+            ans = (s + step*3).toString();
+            ops = [ans, (s+step*4).toString(), (s+step*3+1).toString(), (s+5).toString()];
+        } else { // Logic
+            const logicQ = [
+                {q: "Jika semua X adalah Y, dan Z adalah X, maka...", a: "Z adalah Y"},
+                {q: "Buku ke Ilmu sama dengan Jembatan ke...", a: "Penyeberangan"},
+                {q: "Manakah yang tidak termasuk kelompoknya?", a: "Pesawat", ops: ["Mobil", "Motor", "Sepeda", "Pesawat"]}
+            ];
+            let pick = logicQ[Math.floor(Math.random()*logicQ.length)];
+            q = pick.q; ans = pick.a;
+            ops = pick.ops || [ans, "Tidak ada hubungan", "Beberapa Z adalah Y", "Semua Y adalah Z"];
         }
 
-        async function check(val) {
-            totalCount++;
-            if(val == currentAnswer) correctCount++;
-            document.getElementById('statTotal').innerText = totalCount;
-            document.getElementById('statCorrect').innerText = correctCount;
-            generateQuestion();
+        document.getElementById('question').innerText = q;
+        curAns = ans;
+        document.getElementById('options').innerHTML = ops.sort(() => Math.random() - 0.5).map(o => `<div class="opt" onclick="check('${o}')">${o}</div>`).join('');
+    }
+
+    async function check(val) {
+        tCount++;
+        if(val === curAns) cCount++;
+        document.getElementById('total').innerText = tCount;
+        document.getElementById('correct').innerText = cCount;
+        generate();
+    }
+
+    const interval = setInterval(async () => {
+        timeLeft--;
+        let m = Math.floor(timeLeft/60), s = timeLeft%60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+
+        if(timeLeft <= 0) {
+            clearInterval(interval);
+            // Rumus IQ Sederhana: 100 + (Benar*3) - (Salah)
+            const iq = 100 + (cCount * 3) - (tCount - cCount);
+            const nama = localStorage.getItem('iq_user_name') || "User";
+            
+            await fetch('/api/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nama, benar: cCount, total: tCount, iq })
+            });
+
+            Swal.fire({
+                title: 'Waktu Habis!',
+                html: `Analisis IQ Selesai.<br>Skor IQ Anda: <b style="color:#00d2ff;font-size:24px">${iq}</b>`,
+                icon: 'success'
+            }).then(() => window.location.href = "/");
         }
+    }, 1000);
 
-        function calculateIQ(correct, total) {
-            // Rumus simulasi: Base 100 + (Bonus Benar * Faktor Kesulitan)
-            if (total === 0) return 0;
-            let ratio = correct / total;
-            return Math.round(90 + (correct * 2) + (ratio * 10));
-        }
-
-        const timerInterval = setInterval(async () => {
-            timeLeft--;
-            let min = Math.floor(timeLeft / 60);
-            let sec = timeLeft % 60;
-            document.getElementById('timer').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
-
-            if(timeLeft <= 0) {
-                clearInterval(timerInterval);
-                const finalIQ = calculateIQ(correctCount, totalCount);
-                const nama = localStorage.getItem('namaPeserta');
-
-                await fetch('/api/submit', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ nama, benar: correctCount, total: totalCount, iq: finalIQ })
-                });
-
-                Swal.fire({
-                    title: 'Waktu Habis!',
-                    html: `Analisis Selesai.<br>Skor IQ Anda: <b>${finalIQ}</b><br>Benar: ${correctCount}/${totalCount}`,
-                    icon: 'success'
-                }).then(() => window.location.href = "/");
-            }
-        }, 1000);
-
-        generateQuestion();
+    generate();
     </script>
 </body>
 </html>
-
