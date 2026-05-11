@@ -3,106 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT-AM | Portal Ujian</title>
+    <title>Intelligence Quotient Test | Portal Resmi</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --dark: #0f172a;
+            --card: #1e293b;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #1a1a2e;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
+
         .login-card {
-            background: #16213e;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            background: var(--card);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             text-align: center;
-            border-top: 6px solid #e94560;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
         }
-        .logo-area h1 {
+
+        .icon-box {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
             margin: 0;
-            font-size: 28px;
-            color: #e94560;
-            letter-spacing: 2px;
+            font-size: 26px;
+            background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-transform: uppercase;
         }
-        .logo-area p {
+
+        p.subtitle {
+            color: #94a3b8;
             font-size: 14px;
-            color: #888;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
         input {
             width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 10px;
-            border: 2px solid #0f3460;
-            background: #0f3460;
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid #334155;
+            background: #0f172a;
             color: white;
-            text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             box-sizing: border-box;
+            transition: all 0.3s;
         }
+
         input:focus {
             outline: none;
-            border-color: #e94560;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
         }
+
         button {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             border: none;
-            background: #e94560;
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
             color: white;
             font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(58, 123, 213, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .admin-trigger {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #475569;
             cursor: pointer;
             transition: 0.3s;
         }
-        button:hover {
-            background: #ff4d6d;
-            transform: scale(1.02);
+
+        .admin-trigger:hover {
+            color: var(--primary);
         }
-        .admin-link {
-            margin-top: 25px;
-            font-size: 13px;
-            color: #533483;
-            cursor: pointer;
+
+        /* Override SweetAlert2 Style agar matching dengan tema Dark */
+        .swal2-popup {
+            background: #1e293b !important;
+            color: white !important;
+            border-radius: 20px !important;
         }
-        /* Custom SweetAlert Style */
-        .swal2-popup { background: #16213e !important; color: white !important; border-radius: 15px !important; }
         .swal2-title, .swal2-html-container { color: white !important; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <div class="logo-area">
-        <h1>CBT-AM</h1>
-        <p>Al-Muslim Computer Based Test</p>
+    <div class="icon-box">🧠</div>
+    <h1>IQ TEST CENTER</h1>
+    <p class="subtitle">Ukur potensi kognitif Anda sekarang</p>
+
+    <div class="input-group">
+        <label>Kode Akses Peserta</label>
+        <input type="text" id="studentCode" placeholder="Masukkan 10 digit kode..." maxlength="10">
     </div>
+    
+    <button onclick="loginSiswa()">MULAI ANALISIS</button>
 
-    <input type="text" id="studentCode" placeholder="KODE AKSES" maxlength="10">
-    <button onclick="loginSiswa()">MASUK UJIAN</button>
-
-    <div class="admin-link" onclick="loginAdmin()">Panel Administrator</div>
+    <div class="admin-trigger" onclick="loginAdmin()">System Administrator</div>
 </div>
 
 <script>
-// FUNGSI LOGIN SISWA
+// AGAR TIDAK ADA POP-UP BIASA, KITA HAPUS SEMUA PERINTAH 'alert'
 async function loginSiswa() {
     const code = document.getElementById('studentCode').value.toUpperCase().trim();
 
     if (!code) {
-        return Swal.fire({ icon: 'warning', title: 'Kosong?', text: 'Masukkan kode akses dulu!', confirmButtonColor: '#e94560' });
+        return Swal.fire({
+            icon: 'info',
+            title: 'Kode Diperlukan',
+            text: 'Harap masukkan kode akses untuk memulai tes.',
+            confirmButtonColor: '#3a7bd5'
+        });
     }
 
-    Swal.fire({ title: 'Mengecek...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+    // Tampilan Loading Modern
+    Swal.fire({
+        title: 'Menghubungkan ke Server...',
+        html: 'Memvalidasi data peserta',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading() }
+    });
 
     try {
         const response = await fetch('/api/validate', {
@@ -114,24 +182,42 @@ async function loginSiswa() {
         const data = await response.json();
         
         if (data.success) {
-            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Akses diterima.', showConfirmButton: false, timer: 1500 })
-            .then(() => { window.location.href = "soal.html"; });
+            Swal.fire({
+                icon: 'success',
+                title: 'Akses Diberikan',
+                text: 'Mempersiapkan modul soal...',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = "soal.html"; 
+            });
         } else {
-            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, confirmButtonColor: '#e94560' });
+            Swal.fire({
+                icon: 'error',
+                title: 'Akses Gagal',
+                text: data.message,
+                confirmButtonColor: '#3a7bd5'
+            });
         }
     } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Offline', text: 'Server tidak merespon!', confirmButtonColor: '#e94560' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Masalah Koneksi',
+            text: 'Gagal terhubung ke pusat data. Cek internet lo!',
+            confirmButtonColor: '#3a7bd5'
+        });
     }
 }
 
-// FUNGSI LOGIN ADMIN
 async function loginAdmin() {
     const { value: password } = await Swal.fire({
-        title: 'Login Admin',
+        title: 'Akses Sistem',
         input: 'password',
-        inputLabel: 'Password',
+        inputLabel: 'Masukkan Password Admin',
+        inputPlaceholder: 'Sandi rahasia...',
         showCancelButton: true,
-        confirmButtonColor: '#e94560'
+        confirmButtonColor: '#3a7bd5',
+        cancelButtonColor: '#1e293b'
     });
 
     if (password) {
@@ -142,24 +228,31 @@ async function loginAdmin() {
                 body: JSON.stringify({ password })
             });
             const data = await response.json();
+            
             if (data.success) {
                 Swal.fire({
-                    icon: 'info',
-                    title: 'Token Hari Ini',
-                    html: `<h2 style="color:#e94560">${data.dailyCode}</h2>`,
+                    icon: 'success',
+                    title: 'Login Berhasil',
+                    html: `Token Akses Hari Ini:<br><br><span style="font-size:24px; font-weight:bold; color:#00d2ff">${data.dailyCode}</span>`,
                     confirmButtonText: 'Salin Kode',
-                    confirmButtonColor: '#e94560'
+                    confirmButtonColor: '#3a7bd5'
                 }).then(() => {
                     navigator.clipboard.writeText(data.dailyCode);
                 });
             } else {
-                Swal.fire({ icon: 'error', title: 'Salah!', text: 'Password Admin salah.' });
+                Swal.fire({ icon: 'error', title: 'Ditolak', text: 'Password admin tidak valid.' });
             }
         } catch (err) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal terhubung.' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal memproses permintaan.' });
         }
     }
 }
+
+// Support tombol Enter
+document.getElementById('studentCode').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') loginSiswa();
+});
 </script>
+
 </body>
 </html>
