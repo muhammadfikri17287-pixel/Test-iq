@@ -8,17 +8,16 @@ app.use(express.static(__dirname));
 
 const ADMIN_USER = "Architect";
 const ADMIN_PASS = "Lain2026";
-let dataSkor = []; // Penampung hasil tes siswa
+let dataSkor = []; 
 
 function generateDailyCode() {
     const today = new Date().toISOString().slice(0, 10); 
-    const hash = crypto.createHash('sha256').update(today + "secret-iq").digest('hex');
+    const hash = crypto.createHash('sha256').update(today + "mensa-iq").digest('hex');
     return "IQ-" + hash.slice(0, 5).toUpperCase();
 }
 
 const dailyCode = generateDailyCode();
 
-// API: Login Admin & Liat Skor
 app.post('/api/admin', (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USER && password === ADMIN_PASS) {
@@ -28,10 +27,9 @@ app.post('/api/admin', (req, res) => {
     }
 });
 
-// API: Simpan Hasil Tes
 app.post('/api/submit', (req, res) => {
-    const { nama, skor } = req.body;
-    dataSkor.push({ nama, skor, waktu: new Date().toLocaleString('id-ID') });
+    const { nama, benar, total, iq } = req.body;
+    dataSkor.push({ nama, benar, total, iq, waktu: new Date().toLocaleString('id-ID') });
     res.json({ success: true });
 });
 
@@ -41,8 +39,6 @@ app.post('/api/validate', (req, res) => {
     else res.status(403).json({ success: false, message: "Kode Salah!" });
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server Ready`));
+app.listen(PORT, () => console.log(`Server running`));
 module.exports = app;
